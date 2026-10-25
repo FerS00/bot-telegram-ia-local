@@ -1,78 +1,78 @@
 # ShopIA
 
-**Propuesta de chatbot de IA privada para empresas, con RAG empresarial sobre datos propios autorizados.**<br>
-*Estado: prototipo de referencia. El repositorio contiene un sistema ejecutable que demuestra el enfoque sobre una tienda ficticia: bot de Telegram en español, búsqueda estructurada sobre un libro Excel local de solo lectura, RAG léxico (BM25) con Ollama local y pedidos simulados `SIM-`.*
+**Proposal for a private AI chatbot for businesses, with enterprise RAG over the organization's own authorized data.**<br>
+*Status: reference prototype. The repository contains an executable system that demonstrates the approach on a fictional store: a Telegram bot that replies in Spanish, structured search over a local read-only Excel workbook, lexical RAG (BM25) with local Ollama, and simulated `SIM-` orders.*
 
 ![Python](https://img.shields.io/badge/Python-3.11%2B-3776AB?style=flat-square&logo=python&logoColor=white)
 ![Telegram](https://img.shields.io/badge/Telegram-python--telegram--bot%2022.8-26A5E4?style=flat-square&logo=telegram&logoColor=white)
 ![Ollama](https://img.shields.io/badge/Ollama-local-000000?style=flat-square)
-![SQLite](https://img.shields.io/badge/SQLite-runtime%20local-003B57?style=flat-square&logo=sqlite&logoColor=white)
+![SQLite](https://img.shields.io/badge/SQLite-local%20runtime-003B57?style=flat-square&logo=sqlite&logoColor=white)
 ![openpyxl](https://img.shields.io/badge/openpyxl-3.1.5-217346?style=flat-square)
-![Estado](https://img.shields.io/badge/estado-propuesta%20%2F%20prototipo-blue?style=flat-square)
+![Status](https://img.shields.io/badge/status-proposal%20%2F%20prototype-blue?style=flat-square)
 
 ---
 
-### Resumen
+### Summary
 
-La **propuesta** es un chatbot de IA privada para empresas. Su objetivo es que el asistente intente responder usando únicamente datos propios de la organización, previamente autorizados por ella, mediante RAG (recuperación de documentos antes de generar la respuesta). La inferencia del modelo ocurre en Ollama local y no se envía a proveedores externos de IA.
+The **proposal** is a private AI chatbot for businesses. Its goal is for the assistant to try to answer using only the organization's own data, previously authorized by that organization, through RAG (retrieving documents before generating the answer). Model inference runs on local Ollama and is not sent to external AI providers.
 
-El **prototipo** es el sistema ejecutable de este repositorio. Ilustra el enfoque sobre una tienda ficticia: los precios, el stock, los envíos y las promociones salen del libro `ShopIA_Base_Datos_RAG.xlsx`, que el proyecto **lee en modo solo lectura**. El carrito y los pedidos se guardan en una base SQLite local. Los pedidos `SIM-` son simulados: no se cobra nada y el libro no se modifica.
+The **prototype** is the executable system in this repository. It illustrates the approach on a fictional store: prices, stock, shipping and promotions come from the `ShopIA_Base_Datos_RAG.xlsx` workbook, which the project **reads in read-only mode**. Carts and orders are stored in a local SQLite database. `SIM-` orders are simulated: nothing is charged and the workbook is not modified.
 
 > [!NOTE]
-> **Estado: prototipo de referencia, no producto listo para producción.** No hay garantía de exactitud de las respuestas, ni validación de seguridad o de operación para uso real. Telegram es un servicio externo que transporta los mensajes y las respuestas, así que la privacidad del canal debe evaluarse antes de manejar datos reales. Cada organización debe conectar sus propias fuentes y validar sus permisos, esquemas y procesos. Ver [Propuesta adaptable](#propuesta-adaptable).
+> **Status: reference prototype, not production-ready software.** There is no guarantee that answers are accurate, and there is no security or operational validation for real-world use. Telegram is an external service that carries the messages and replies, so the privacy of the channel must be assessed before handling real data. Each organization must connect its own sources and validate its permissions, schemas and processes. See [Adaptable proposal](#adaptable-proposal).
 
 ---
 
-### Prototipo actual
+### Current prototype
 
-| Componente | Qué hace hoy el prototipo |
+| Component | What the prototype does today |
 |---|---|
-| Canal | Bot de Telegram con long polling (sin webhooks). Telegram es un servicio externo: transporta los mensajes y las respuestas. |
-| Fuente de datos | Libro `ShopIA_Base_Datos_RAG.xlsx` en solo lectura. **No incluido en el repositorio.** |
-| Búsqueda estructurada | Consultas de catálogo (precio, stock, estado, presupuesto y ficha técnica) resueltas sin modelo. |
-| RAG | Índice BM25 ligero sobre la hoja `Documentos_RAG`. Entrega al modelo hasta 5 documentos y hasta 3 productos reales, como datos no confiables. |
-| Modelo | Inferencia en Ollama local, en loopback (`127.0.0.1`, `localhost` o `::1`), sin herramientas y sin proveedores externos de IA. Modelo configurable en `OLLAMA_MODEL`. |
-| Tienda | Ficticia: catálogo, envíos, cupones y promociones de ejemplo. |
-| Pedidos | Simulados con código `SIM-`. No cobran dinero ni modifican el libro; el stock consumido queda solo en SQLite local. |
-| Persistencia | SQLite local: carritos, preferencias, pedidos e historial (máximo 8 intercambios por usuario). |
+| Channel | Telegram bot using long polling (no webhooks). Telegram is an external service: it carries the messages and replies. |
+| Data source | `ShopIA_Base_Datos_RAG.xlsx` workbook, read-only. **Not included in the repository.** |
+| Structured search | Catalog queries (price, stock, status, budget and technical sheet) answered without a model. |
+| RAG | Lightweight BM25 index over the `Documentos_RAG` sheet. Passes the model up to 5 documents and up to 3 real products, as untrusted data. |
+| Model | Local Ollama inference on loopback (`127.0.0.1`, `localhost` or `::1`), with no tools and no external AI providers. Model configurable in `OLLAMA_MODEL`. |
+| Store | Fictional: sample catalog, shipping, coupons and promotions. |
+| Orders | Simulated, with `SIM-` codes. They do not charge money or modify the workbook; consumed stock is recorded only in the local SQLite database. |
+| Persistence | Local SQLite: carts, preferences, orders and history (maximum of 8 exchanges per user). |
 
 ---
 
-### Propuesta adaptable
+### Adaptable proposal
 
-La propuesta no consiste en desplegar el prototipo tal cual, sino en adaptarlo a cada organización. La adaptación afecta a varias capas, no solo a un módulo:
+The proposal is not to deploy the prototype as-is, but to adapt it to each organization. The adaptation affects several layers, not just one module:
 
-- **Conector de datos.** El prototipo lee un único libro Excel. Cada empresa debe definir cómo se conectan sus fuentes autorizadas (hojas, bases de datos o documentos internos), con acceso de solo lectura y los datos mínimos necesarios.
-- **Recuperación.** El índice BM25 léxico del prototipo debe evaluarse frente al corpus real de cada organización. Puede requerir otra estrategia de indexación o de búsqueda, y su calidad no está medida en el prototipo.
-- **Esquema.** Hojas, columnas, tipos y reglas de calidad deben corresponder a los datos reales de la organización. Hoy el arranque se detiene si faltan hojas o columnas esperadas, pero no valida el contenido.
-- **Permisos.** El prototipo no implementa control de acceso por roles ni restringe qué documentos puede consultar cada usuario. Antes de indexar datos sensibles, la organización debe definir quién puede consultar cada fuente y comprobar que el sistema lo aplica.
-- **Procesos de negocio.** Las reglas de envío, cupones, pedidos y disponibilidad son las de la tienda ficticia. Cada empresa debe establecer las suyas y verificarlas con sus responsables.
-- **Privacidad, operación y despliegue.** Hay que evaluar el canal (Telegram es externo), la retención de datos, los registros, las copias de seguridad, el control de acceso a la máquina y las responsabilidades de mantenimiento. Nada de esto está resuelto en el prototipo.
-
----
-
-### Fuente de datos (obligatoria, no incluida)
-
-El libro `ShopIA_Base_Datos_RAG.xlsx` **es obligatorio para arrancar el prototipo** y **no forma parte del repositorio público**. Coloca una copia autorizada en la raíz del proyecto, o indica su ubicación en `EXCEL_PATH` dentro de `.env`. En una implementación adaptada, esta fuente se sustituye por la de cada organización.
-
-- Si el libro falta, o le faltan hojas o columnas, `main.py` se detiene con un mensaje que nombra lo que falta (código de salida `3`).
-- El programa solo lee el libro. Nunca lo escribe.
-- El libro, los archivos de Excel temporales y cualquier copia local no deben subirse a Git.
+- **Data connector.** The prototype reads a single Excel workbook. Each company must define how its authorized sources are connected (sheets, databases or internal documents), with read-only access and the minimum data necessary.
+- **Retrieval.** The prototype's lexical BM25 index must be evaluated against each organization's real corpus. It may require a different indexing or search strategy, and its quality is not measured in the prototype.
+- **Schema.** Sheets, columns, types and quality rules must match the organization's real data. Today, startup stops if expected sheets or columns are missing, but it does not validate the content.
+- **Permissions.** The prototype does not implement role-based access control and does not restrict which documents each user can query. Before indexing sensitive data, the organization must define who may query each source and verify that the system enforces it.
+- **Business processes.** The shipping, coupon, order and availability rules are those of the fictional store. Each company must establish its own and verify them with its managers.
+- **Privacy, operations and deployment.** The channel (Telegram is external), data retention, logs, backups, access control to the machine and maintenance responsibilities must all be assessed. None of this is addressed in the prototype.
 
 ---
 
-### Requisitos
+### Data source (required, not included)
 
-- Windows con PowerShell.
-- Python 3.11 o superior. Los ejemplos usan `py -3.12`.
-- Un token de BotFather para `TELEGRAM_BOT_TOKEN`. Solo hace falta para ejecutar el bot; `diagnostico.py` funciona sin él.
-- Opcional, pero necesario para preguntas abiertas: Ollama instalado y en ejecución en la misma máquina, con el modelo `qwen2.5-coder:7b` u otro configurado en `OLLAMA_MODEL`.
+The `ShopIA_Base_Datos_RAG.xlsx` workbook **is required to start the prototype** and **is not part of the public repository**. Place an authorized copy in the project root, or set its location in `EXCEL_PATH` inside `.env`. In an adapted implementation, this source is replaced by the organization's own.
+
+- If the workbook is missing, or is missing sheets or columns, `main.py` stops with a message that names what is missing (exit code `3`).
+- The program only reads the workbook. It never writes to it.
+- The workbook, temporary Excel files and any local copies must not be uploaded to Git.
 
 ---
 
-### Instalación
+### Requirements
 
-Desde la carpeta del proyecto:
+- Windows with PowerShell.
+- Python 3.11 or later. The examples use `py -3.12`.
+- A BotFather token for `TELEGRAM_BOT_TOKEN`. It is only needed to run the bot; `diagnostico.py` works without it.
+- Optional, but required for open-ended questions: Ollama installed and running on the same machine, with the `qwen2.5-coder:7b` model or another model set in `OLLAMA_MODEL`.
+
+---
+
+### Installation
+
+From the project folder:
 
 ```powershell
 py -3.12 -m venv .venv
@@ -80,229 +80,231 @@ py -3.12 -m venv .venv
 if (-not (Test-Path .env)) { Copy-Item .env.example .env }
 ```
 
-El último comando crea `.env` solo si no existe, así que nunca sobrescribe tu configuración. Después, edita `.env` y completa `TELEGRAM_BOT_TOKEN` con el token de BotFather. Conserva las demás variables.
+The last command creates `.env` only if it does not already exist, so it never overwrites your configuration. Then edit `.env` and fill in `TELEGRAM_BOT_TOKEN` with the BotFather token. Keep the other variables.
 
-`.env` contiene secretos. Está excluido por `.gitignore` y no debe subirse nunca al repositorio.
+`.env` contains secrets. It is excluded by `.gitignore` and must never be committed to the repository.
 
-#### Dependencias fijadas (`requirements.txt`)
+#### Pinned dependencies (`requirements.txt`)
 
-| Paquete | Versión | Uso |
+| Package | Version | Purpose |
 |---|---|---|
-| `python-telegram-bot` | 22.8 | Bot y long polling |
-| `openpyxl` | 3.1.5 | Lectura del libro en solo lectura |
-| `httpx` | 0.28.1 | Cliente HTTP local hacia Ollama |
-| `python-dotenv` | 1.2.4 | Carga de `.env` |
-| `pytest` | 9.1.1 | Solo para las pruebas (dependencia de desarrollo) |
+| `python-telegram-bot` | 22.8 | Bot and long polling |
+| `openpyxl` | 3.1.5 | Read-only access to the workbook |
+| `httpx` | 0.28.1 | Local HTTP client for Ollama |
+| `python-dotenv` | 1.2.4 | Loads `.env` |
+| `pytest` | 9.1.1 | Tests only (development dependency) |
 
 ---
 
-### Configuración (`.env`)
+### Configuration (`.env`)
 
-| Variable | Valor por defecto | Descripción |
+| Variable | Default value | Description |
 |---|---|---|
-| `TELEGRAM_BOT_TOKEN` | (vacío) | Token de BotFather. Obligatorio solo para `main.py`. |
-| `EXCEL_PATH` | `ShopIA_Base_Datos_RAG.xlsx` | Ruta del libro. Si es relativa, se resuelve desde la raíz del proyecto. |
-| `SQLITE_PATH` | `runtime/shopia.sqlite3` | Base SQLite de carritos, preferencias, pedidos e historial. Se crea al arrancar. |
-| `OLLAMA_BASE_URL` | `http://127.0.0.1:11434` | Solo se aceptan URLs de loopback (`127.0.0.1`, `localhost` o `::1`). |
-| `OLLAMA_MODEL` | `qwen2.5-coder:7b` | Modelo que usa el asistente. |
-| `OLLAMA_TIMEOUT_S` | `120` | Segundos máximos de espera por respuesta del modelo. Debe ser mayor que cero. |
+| `TELEGRAM_BOT_TOKEN` | (empty) | BotFather token. Required only for `main.py`. |
+| `EXCEL_PATH` | `ShopIA_Base_Datos_RAG.xlsx` | Path to the workbook. If relative, it is resolved from the project root. |
+| `SQLITE_PATH` | `runtime/shopia.sqlite3` | SQLite database for carts, preferences, orders and history. Created at startup. |
+| `OLLAMA_BASE_URL` | `http://127.0.0.1:11434` | Only loopback URLs are accepted (`127.0.0.1`, `localhost` or `::1`). |
+| `OLLAMA_MODEL` | `qwen2.5-coder:7b` | Model used by the assistant. |
+| `OLLAMA_TIMEOUT_S` | `120` | Maximum seconds to wait for a model response. Must be greater than zero. |
 
-ShopIA no usa proveedores de IA externos. Si `OLLAMA_BASE_URL` apunta a otra máquina, la configuración se rechaza al arrancar.
+ShopIA does not use external AI providers. If `OLLAMA_BASE_URL` points to another machine, the configuration is rejected at startup.
 
 ---
 
-### Comprobaciones
+### Checks
 
 ```powershell
-.venv\Scripts\python.exe diagnostico.py              # libro, token (solo presencia), Ollama y chat de prueba
-.venv\Scripts\python.exe diagnostico.py --sin-ping   # igual, sin enviar mensaje al modelo
+.venv\Scripts\python.exe diagnostico.py              # workbook, token (presence only), Ollama and a test chat
+.venv\Scripts\python.exe diagnostico.py --sin-ping   # same, without sending a message to the model
 ```
 
-`diagnostico.py` valida el libro y muestra solo conteos de filas, nunca su contenido. Indica si `TELEGRAM_BOT_TOKEN` está presente, sin mostrar su valor. Comprueba que Ollama responde y que el modelo configurado está instalado. Sin `--sin-ping`, envía un mensaje de prueba al modelo. Si el libro falla, el estado global es `FALLIDO` y el código de salida es `1`.
+`diagnostico.py` validates the workbook and shows only row counts, never its contents. It reports whether `TELEGRAM_BOT_TOKEN` is present, without showing its value. It checks that Ollama responds and that the configured model is installed. Without `--sin-ping`, it sends a test message to the model. If the workbook check fails, the overall status is `FALLIDO` (the literal status printed by the script) and the exit code is `1`.
 
-#### Pruebas
+#### Tests
 
 ```powershell
 .venv\Scripts\python.exe -m pytest -q -p no:cacheprovider tests/test_shop.py
 ```
 
-Las pruebas **necesitan el libro local** en la raíz del proyecto, porque leen sus valores esperados directamente con `openpyxl`. No necesitan token de Telegram ni Ollama: la red va simulada y las bases SQLite son temporales.
+The tests **require the local workbook** in the project root, because they read the expected values directly with `openpyxl`. They do not need a Telegram token or Ollama: network calls are simulated and the SQLite databases are temporary.
 
 ---
 
-### Ejecutar el bot
+### Running the bot
 
 ```powershell
 .venv\Scripts\python.exe main.py
 ```
 
-El bot arranca con **long polling** (sin webhooks). Para detenerlo, pulsa `Ctrl+C`.
+The bot starts with **long polling** (no webhooks). To stop it, press `Ctrl+C`.
 
-| Situación | Resultado |
+| Situation | Result |
 |---|---|
-| Falta `TELEGRAM_BOT_TOKEN` | Termina con un mensaje claro y código `2`. |
-| Libro ausente o incompleto | Termina con un mensaje que nombra lo que falta y código `3`. |
-| Ollama no responde al arrancar | El bot sigue funcionando en modo determinista y registra un aviso. |
+| `TELEGRAM_BOT_TOKEN` is missing | Exits with a clear message and code `2`. |
+| Workbook missing or incomplete | Exits with a message that names what is missing, and code `3`. |
+| Ollama does not respond at startup | The bot keeps working in deterministic mode and logs a warning. |
 
 ---
 
-### Comandos de Telegram
+### Telegram commands
 
-| Comando | Qué hace |
+| Command | What it does |
 |---|---|
-| `/start` | Muestra la ayuda y los botones Catálogo, Ofertas, Envíos y Carrito. |
-| `/catalogo` | Categorías con el número de productos comprables. |
-| `/buscar [texto y presupuesto]` | Hasta 4 productos comprables, ordenados por relevancia. Admite un presupuesto como `hasta S/ 2000`. |
-| `/producto SKU` | Ficha del producto, precio, estado, stock y garantía. Indica si no está disponible. |
-| `/comparar SKU1 SKU2` | Precio, garantía, stock y ficha técnica lado a lado. |
-| `/agregar SKU [cantidad]` | Agrega al carrito. La cantidad va de 1 a 99 y se valida contra el stock. |
-| `/carrito` | Muestra el carrito, el envío, el cupón y el total estimado. |
-| `/quitar SKU` | Quita un producto del carrito. |
-| `/vaciar` | Vacía el carrito. |
-| `/envio [distrito]` | Tarifa, plazo y condición de envío gratis. Guarda el destino para la compra. Sin argumento, muestra el destino guardado. |
-| `/promos` | Promociones vigentes hoy. |
-| `/cupon CODIGO` | Guarda un cupón vigente. `/cupon quitar` lo elimina y `/cupon` sin argumento muestra el guardado. |
-| `/comprar` | Crea un pedido `SIM-` simulado y muestra el resumen. Exige carrito, destino y productos disponibles. |
-| `/pedido CODIGO` | Consulta un pedido `SIM-` de tu cuenta o un pedido de ejemplo (`DEMO-…`) del libro. |
+| `/start` | Shows help and the buttons *Catálogo* (Catalog), *Ofertas* (Offers), *Envíos* (Shipping) and *Carrito* (Cart). |
+| `/catalogo` | Categories with the number of purchasable products. |
+| `/buscar [texto y presupuesto]` | Up to 4 purchasable products, sorted by relevance. Accepts a budget such as `hasta S/ 2000` (Spanish example, meaning "up to S/ 2000"). |
+| `/producto SKU` | Product sheet, price, status, stock and warranty. Indicates if it is not available. |
+| `/comparar SKU1 SKU2` | Price, warranty, stock and technical sheet side by side. |
+| `/agregar SKU [cantidad]` | Adds to the cart. Quantity ranges from 1 to 99 and is validated against stock. |
+| `/carrito` | Shows the cart, shipping, coupon and estimated total. |
+| `/quitar SKU` | Removes a product from the cart. |
+| `/vaciar` | Empties the cart. |
+| `/envio [distrito]` | Shipping fee, lead time and free-shipping condition. Saves the destination for checkout. Without an argument, shows the saved destination. |
+| `/promos` | Promotions valid today. |
+| `/cupon CODIGO` | Saves a valid coupon. `/cupon quitar` removes it, and `/cupon` without an argument shows the saved coupon. |
+| `/comprar` | Creates a simulated `SIM-` order and shows the summary. Requires a cart, a destination and available products. |
+| `/pedido CODIGO` | Looks up a `SIM-` order from your account, or a sample order (`DEMO-…`) from the workbook. |
 
-Cualquier texto que no sea comando se interpreta como lenguaje natural (ver la sección siguiente).
+Any text that is not a command is interpreted as natural language (see the next section).
 
 ---
 
-### Lenguaje natural
+### Natural language
 
-El bot decide cómo responder según el mensaje. Las reglas se aplican en este orden:
+The bot decides how to respond based on the message. The rules are applied in this order. The Spanish examples below are literal inputs the bot understands; their English meanings are given in parentheses.
 
-| Tipo de mensaje | Cómo se resuelve | Ejemplos |
+| Message type | How it is handled | Examples |
 |---|---|---|
-| Seguimiento | Usa solo el historial breve del mismo usuario (los últimos productos mostrados). | «¿y uno más barato?», «¿cuál tiene más RAM?» |
-| Promociones | Lista las promociones vigentes. | «¿hay ofertas?» |
-| Envío a un distrito | Cotiza el envío si el distrito aparece en el libro. No guarda el destino. | «¿cuánto cuesta el envío a <distrito>?» |
-| Precio, costo, existencia o disponibilidad | **Búsqueda estructurada** sobre el catálogo, sin modelo. Muestra datos reales del libro. | «¿hay laptops?», «¿cuánto cuesta una laptop?» |
-| Búsqueda con presupuesto o coincidencia directa | **Búsqueda estructurada**, sin modelo. | «laptop hasta S/ 2000 con 16 GB» |
-| Pregunta abierta o recomendación | **RAG con Ollama**: recupera hasta 5 documentos del libro y hasta 3 productos reales, y los entrega al modelo como datos no confiables. | «¿qué laptop conviene para estudiar?», «¿cuál es la política de devoluciones?» |
+| Follow-up | Uses only the short history of the same user (the most recently shown products). | «¿y uno más barato?» (Spanish example: "and a cheaper one?"), «¿cuál tiene más RAM?» (Spanish example: "which one has more RAM?") |
+| Promotions | Lists the current promotions. | «¿hay ofertas?» (Spanish example: "are there any offers?") |
+| Shipping to a district | Quotes shipping if the district appears in the workbook. Does not save the destination. | «¿cuánto cuesta el envío a <distrito>?» (Spanish example: "how much is shipping to <district>?") |
+| Price, cost, stock or availability | **Structured search** over the catalog, without a model. Shows real data from the workbook. | «¿hay laptops?» (Spanish example: "are there laptops?"), «¿cuánto cuesta una laptop?» (Spanish example: "how much does a laptop cost?") |
+| Search with budget or direct match | **Structured search**, without a model. | «laptop hasta S/ 2000 con 16 GB» (Spanish example: "laptop up to S/ 2000 with 16 GB") |
+| Open question or recommendation | **RAG with Ollama**: retrieves up to 5 documents from the workbook and up to 3 real products, and passes them to the model as untrusted data. | «¿qué laptop conviene para estudiar?» (Spanish example: "which laptop is good for studying?"), «¿cuál es la política de devoluciones?» (Spanish example: "what is the return policy?") |
 
-Reglas que conviene conocer:
+Rules worth knowing:
 
-- La búsqueda con precio o disponibilidad no llama a Ollama. Solo las preguntas abiertas usan el modelo.
-- Si Ollama no responde, el bot lo indica y sugiere comandos (`/buscar`, `/producto`, `/envio`, `/promos`) y temas relacionados del libro.
-- El lenguaje natural **no realiza transacciones**: no agrega al carrito, no compra, no aplica cupones y no guarda destinos. Para eso se usan los comandos.
-- El mensaje libre admite hasta 500 caracteres.
+- Searches by price or availability do not call Ollama. Only open questions use the model.
+- If Ollama does not respond, the bot says so and suggests commands (`/buscar`, `/producto`, `/envio`, `/promos`) and related topics from the workbook.
+- Natural language **does not perform transactions**: it does not add to the cart, place orders, apply coupons or save destinations. Use the commands for that.
+- Free-text messages accept up to 500 characters.
 
 ---
 
-### Arquitectura
+### Architecture
 
 ```mermaid
 flowchart LR
-    TG["Telegram (long polling)"] --> MAIN["main.py<br/>handlers de comandos y texto libre"]
-    MAIN --> SS["ShopService<br/>reglas de negocio"]
-    SS --> ER["ExcelRepository<br/>libro en solo lectura"]
-    SS --> RAG["IndiceRAG<br/>BM25 sobre Documentos_RAG"]
+    TG["Telegram (long polling)"] --> MAIN["main.py<br/>command and free-text handlers"]
+    MAIN --> SS["ShopService<br/>business rules"]
+    SS --> ER["ExcelRepository<br/>read-only workbook"]
+    SS --> RAG["IndiceRAG<br/>BM25 over Documentos_RAG"]
     SS --> OC["OllamaClient<br/>loopback"]
-    OC --> OL["Ollama local<br/>/api/chat"]
-    SS --> ST["Storage<br/>SQLite local"]
+    OC --> OL["Local Ollama<br/>/api/chat"]
+    SS --> ST["Storage<br/>local SQLite"]
     ER --> XL[("ShopIA_Base_Datos_RAG.xlsx")]
     ST --> DB[("runtime/shopia.sqlite3")]
 ```
 
-| Módulo | Responsabilidad |
+| Module | Responsibility |
 |---|---|
-| `main.py` | Arranque, handlers de Telegram, long polling y códigos de salida. |
-| `config.py` | Lectura de `.env` y validación de variables. No exige token al importarse. |
-| `shop_service.py` | Reglas de catálogo, búsqueda, carrito, envíos, cupones, pedidos y enrutado de lenguaje natural. |
-| `excel_repository.py` | Carga del libro en memoria (solo lectura) y consultas de productos, zonas, promociones y documentos. |
-| `retrieval.py` | Índice BM25 sobre `Documentos_RAG`, con saneado del texto recuperado. |
-| `ollama_client.py` | Cliente HTTP hacia Ollama (`/api/tags` y `/api/chat`), sin herramientas. |
-| `storage.py` | Carritos, preferencias, pedidos `SIM-` e historial en SQLite. |
-| `diagnostico.py` | Comprobaciones de arranque sin Telegram. |
+| `main.py` | Startup, Telegram handlers, long polling and exit codes. |
+| `config.py` | Reads `.env` and validates variables. Does not require a token on import. |
+| `shop_service.py` | Rules for the catalog, search, cart, shipping, coupons, orders and natural-language routing. |
+| `excel_repository.py` | Loads the workbook into memory (read-only) and queries products, zones, promotions and documents. |
+| `retrieval.py` | BM25 index over `Documentos_RAG`, with sanitization of the retrieved text. |
+| `ollama_client.py` | HTTP client for Ollama (`/api/tags` and `/api/chat`), without tools. |
+| `storage.py` | Carts, preferences, `SIM-` orders and history in SQLite. |
+| `diagnostico.py` | Startup checks without Telegram. |
 
 ---
 
-### Reglas principales
+### Core rules
 
-- **Disponibilidad:** un producto es comprable si su estado es `Activo` y su stock agregado (suma de los almacenes del libro) es mayor que cero.
-- **Stock:** el carrito no reserva unidades. El consumo simulado sale de los pedidos `SIM-` guardados en SQLite.
-- **Envío:** el envío gratis se compara con el subtotal antes de cupones. Si el destino coincide con varias zonas, el bot pide el distrito exacto.
-- **Cupones:** se validan fecha, estado, categoría, monto mínimo y tope definidos en el libro. Un cupón no aplicable se informa y no se aplica.
-- **Pedidos:** un pedido `SIM-` no cobra dinero ni modifica el libro. Solo se consulta desde la cuenta de Telegram que lo creó.
-- **Historial:** se guarda por usuario de Telegram, con un máximo de 8 intercambios. Solo guarda la intención y los SKU mencionados, nunca el texto libre del usuario.
-- **Asistente:** Ollama recibe las instrucciones del sistema, los documentos recuperados delimitados como datos no confiables y los datos estructurados relevantes. No recibe el historial completo ni el libro entero, no usa herramientas y no decide compras ni precios.
-
----
-
-### Escenario de prueba del prototipo
-
-Usa tus propias consultas al libro para obtener SKU, precios y códigos reales. Los valores de ejemplo no están en este documento.
-
-1. **Búsqueda con presupuesto.** Envía `laptop hasta S/ <presupuesto> con <característica>`. Debes ver hasta 4 productos comprables con SKU, precio, estado y stock.
-2. **Disponibilidad.** Envía `¿hay <producto>?` y `¿cuánto cuesta un <producto>?`. La respuesta sale del catálogo, sin modelo.
-3. **Carrito y pedido.** Busca un producto y copia su SKU. Después ejecuta en orden: `/agregar SKU 1`, `/envio <distrito>`, `/carrito` y `/comprar`. Anota el `SIM-` que devuelve y consúltalo con `/pedido SIM-…`.
-4. **Pregunta abierta.** Con Ollama en ejecución, envía una pregunta sobre una política o una recomendación. La respuesta usa el modelo y se apoya en el libro.
+- **Availability:** a product is purchasable if its status is `Activo` (the status value used in the workbook) and its aggregated stock (the sum across the workbook's warehouses) is greater than zero.
+- **Stock:** the cart does not reserve units. Simulated consumption comes from the `SIM-` orders saved in SQLite.
+- **Shipping:** free shipping is compared against the subtotal before coupons. If the destination matches several zones, the bot asks for the exact district.
+- **Coupons:** the date, status, category, minimum amount and cap defined in the workbook are validated. A coupon that does not apply is reported and not applied.
+- **Orders:** a `SIM-` order does not charge money or modify the workbook. It can only be queried from the Telegram account that created it.
+- **History:** stored per Telegram user, with a maximum of 8 exchanges. It stores only the intent and the mentioned SKUs, never the user's free text.
+- **Assistant:** Ollama receives the system instructions, the retrieved documents delimited as untrusted data, and the relevant structured data. It does not receive the full history or the entire workbook, does not use tools, and does not decide purchases or prices.
 
 ---
 
-### Seguridad y datos locales
+### Prototype test scenario
 
-- El token de Telegram vive solo en `.env`. No debe aparecer en Git, capturas, logs ni documentación.
-- El bot no escribe el token en los registros: silencia los mensajes de `httpx`, que incluyen la URL con el token.
-- Los errores internos se responden de forma genérica y en el registro solo se guarda el tipo de excepción.
-- Solo se habla con Ollama en loopback. La inferencia no se envía a proveedores externos de IA.
-- **Telegram es un servicio externo.** Los mensajes de los usuarios y las respuestas del bot pasan por sus servidores. La privacidad de este canal debe evaluarse antes de manejar datos reales.
-- **Identificador de usuario:** el bot no solicita datos personales ni de pago (nombre, domicilio, tarjeta, DNI o contraseñas). Sí usa el ID numérico de Telegram como clave para aislar carritos, preferencias, pedidos e historial de cada usuario. Las preferencias incluyen el distrito de envío elegido con `/envio` y el cupón guardado con `/cupon`. El historial guarda solo la intención y los SKU, nunca el texto libre.
-- Los datos quedan en la máquina local:
+Use your own queries against the workbook to obtain real SKUs, prices and codes. Example values are not included in this document. The Spanish inputs below are literal examples; their English meanings are given in parentheses.
 
-| Elemento | Dónde queda | Nota |
+1. **Budget search.** Send `laptop hasta S/ <presupuesto> con <característica>` (Spanish example: "laptop up to S/ <budget> with <feature>"). You should see up to 4 purchasable products with SKU, price, status and stock.
+2. **Availability.** Send `¿hay <producto>?` and `¿cuánto cuesta un <producto>?` (Spanish examples: "is there a <product>?" and "how much does a <product> cost?"). The answer comes from the catalog, without a model.
+3. **Cart and order.** Search for a product and copy its SKU. Then run, in order: `/agregar SKU 1`, `/envio <distrito>`, `/carrito` and `/comprar`. Note the `SIM-` code it returns and look it up with `/pedido SIM-…`.
+4. **Open question.** With Ollama running, send a question about a policy or a recommendation. The answer uses the model and is grounded in the workbook.
+
+---
+
+### Security and local data
+
+- The Telegram token lives only in `.env`. It must not appear in Git, screenshots, logs or documentation.
+- The bot does not write the token to the logs: it silences the `httpx` messages, which include the URL with the token.
+- Internal errors are answered generically, and the log records only the exception type.
+- Ollama is contacted only on loopback. Inference is not sent to external AI providers.
+- **Telegram is an external service.** Users' messages and the bot's replies pass through its servers. The privacy of this channel must be assessed before handling real data.
+- **User identifier:** the bot does not ask for personal or payment data (name, address, card, national ID or passwords). It does use the numeric Telegram ID as the key that isolates each user's carts, preferences, orders and history. Preferences include the shipping district chosen with `/envio` and the coupon saved with `/cupon`. History stores only the intent and SKUs, never free text.
+- Data stays on the local machine:
+
+| Item | Where it lives | Note |
 |---|---|---|
-| `.env` | Raíz del proyecto | Excluido por `.gitignore`. |
-| `runtime/` y SQLite | Carpeta `runtime/` | Excluidos por `.gitignore`. |
-| `.venv/` y cachés (`__pycache__`, `.pytest_cache`) | Raíz del proyecto | Excluidos por `.gitignore`. |
-| `ShopIA_Base_Datos_RAG.xlsx` | Raíz del proyecto o `EXCEL_PATH` | Obligatorio y no publicado. Nunca lo subas al repositorio. |
-| `graphify-out/` | Raíz del proyecto | Artefactos locales de análisis. No se suben al repositorio. |
+| `.env` | Project root | Excluded by `.gitignore`. |
+| `runtime/` and SQLite | `runtime/` folder | Excluded by `.gitignore`. |
+| `.venv/` and caches (`__pycache__`, `.pytest_cache`) | Project root | Excluded by `.gitignore`. |
+| `ShopIA_Base_Datos_RAG.xlsx` | Project root or `EXCEL_PATH` | Required and not published. Never upload it to the repository. |
+| `graphify-out/` | Project root | Local analysis artifacts. Not uploaded to the repository. |
 
 ---
 
-### Estructura del repositorio
+### Repository structure
 
 ```text
 .
-├── main.py              # Bot de Telegram (long polling)
-├── config.py            # Configuración desde .env
-├── shop_service.py      # Reglas de negocio y lenguaje natural
-├── excel_repository.py  # Lectura del libro (solo lectura)
-├── retrieval.py         # Índice RAG (BM25) y saneado
-├── ollama_client.py     # Cliente local de Ollama
-├── storage.py           # SQLite: carritos, pedidos SIM-, historial
-├── diagnostico.py       # Diagnóstico sin Telegram
+├── main.py              # Telegram bot (long polling)
+├── config.py            # Configuration from .env
+├── shop_service.py      # Business rules and natural language
+├── excel_repository.py  # Workbook reading (read-only)
+├── retrieval.py         # RAG index (BM25) and sanitization
+├── ollama_client.py     # Local Ollama client
+├── storage.py           # SQLite: carts, SIM- orders, history
+├── diagnostico.py       # Diagnostics without Telegram
 ├── tests/
-│   └── test_shop.py     # Pruebas (red mockeada)
-├── requirements.txt     # Dependencias fijadas
-├── .env.example         # Plantilla de configuración (sin secretos)
+│   └── test_shop.py     # Tests (mocked network)
+├── requirements.txt     # Pinned dependencies
+├── .env.example         # Configuration template (no secrets)
 └── .gitignore
 ```
 
 ---
 
-### Solución de problemas
+### Troubleshooting
 
-| Síntoma | Qué revisar |
+The left-hand column shows the literal messages the project prints (in Spanish).
+
+| Symptom | What to check |
 |---|---|
-| `Falta TELEGRAM_BOT_TOKEN` | Completa la variable en `.env` y vuelve a ejecutar `main.py`. |
-| `No se encontró el libro Excel` | Coloca el libro en la raíz o corrige `EXCEL_PATH`. |
-| `Faltan hojas` o `Faltan columnas` | El libro no tiene la estructura esperada. Usa una copia autorizada. |
-| Las preguntas abiertas responden con un aviso | Inicia Ollama, confirma `OLLAMA_BASE_URL` y ejecuta `diagnostico.py`. |
-| `El modelo … no aparece instalado` | Instala el modelo en Ollama o cambia `OLLAMA_MODEL`. |
-| La primera respuesta del modelo tarda mucho | Es la carga en frío del modelo. Reintenta o aumenta `OLLAMA_TIMEOUT_S`. |
-| `OLLAMA_BASE_URL debe apuntar a localhost` | Usa una URL de loopback. ShopIA no admite proveedores externos. |
+| `Falta TELEGRAM_BOT_TOKEN` | Fill in the variable in `.env` and run `main.py` again. |
+| `No se encontró el libro Excel` | Place the workbook in the root folder or correct `EXCEL_PATH`. |
+| `Faltan hojas` or `Faltan columnas` | The workbook does not have the expected structure. Use an authorized copy. |
+| Open questions reply with a warning | Start Ollama, confirm `OLLAMA_BASE_URL` and run `diagnostico.py`. |
+| `El modelo … no aparece instalado` | Install the model in Ollama or change `OLLAMA_MODEL`. |
+| The first model response takes a long time | This is the model's cold start. Retry, or increase `OLLAMA_TIMEOUT_S`. |
+| `OLLAMA_BASE_URL debe apuntar a localhost` | Use a loopback URL. ShopIA does not support external providers. |
 
 ---
 
-### Limitaciones
+### Limitations
 
-- **Búsqueda léxica (BM25), no semántica.** Solo reconoce unas pocas equivalencias de lenguaje común (por ejemplo, «portátil» y «notebook» hacia laptop). Las respuestas del modelo pueden ser incorrectas o incompletas: el prototipo no garantiza exactitud.
-- **Libro local ficticio.** Los datos del prototipo son de ejemplo y no representan a ninguna empresa real.
-- **Sin Ollama:** el bot sigue operativo para búsqueda, carrito, envíos, cupones y pedidos. Las preguntas abiertas responden con un aviso.
-- **Simulación:** no hay pagos ni facturación, y el bot no solicita datos personales ni de pago. El stock se descuenta solo en la base local al confirmar un pedido `SIM-`.
-- **Sin control de acceso por roles ni auditoría de consultas al corpus.** Solo existe la separación por ID de Telegram descrita arriba.
-- **No validado para producción:** no hay pruebas de carga, de seguridad dinámica ni de operación continua. Cualquier uso con datos reales requiere una evaluación propia de la organización.
-- **Alcance de la verificación:** `tests/test_shop.py` usa mocks de red (`httpx.MockTransport`) y bases SQLite temporales. No valida conexiones reales con Telegram ni con Ollama. `diagnostico.py` revisa el libro y el servicio Ollama local, pero no se conecta a Telegram. Ejecuta `diagnostico.py` y las pruebas en tu entorno antes de usar el prototipo.
+- **Lexical search (BM25), not semantic.** It recognizes only a few common-language equivalences (for example, the Spanish terms «portátil» and «notebook» mapped to laptop). Model responses may be incorrect or incomplete: the prototype does not guarantee accuracy.
+- **Fictional local workbook.** The prototype's data is sample data and does not represent any real company.
+- **Without Ollama:** the bot remains operational for search, cart, shipping, coupons and orders. Open questions reply with a warning.
+- **Simulation:** there are no payments or invoicing, and the bot does not ask for personal or payment data. Stock is deducted only in the local database, when a `SIM-` order is confirmed.
+- **No role-based access control or audit of corpus queries.** The only separation is the Telegram ID separation described above.
+- **Not validated for production:** there are no load, dynamic security or continuous operation tests. Any use with real data requires the organization's own assessment.
+- **Scope of verification:** `tests/test_shop.py` uses network mocks (`httpx.MockTransport`) and temporary SQLite databases. It does not validate real connections to Telegram or Ollama. `diagnostico.py` checks the workbook and the local Ollama service, but does not connect to Telegram. Run `diagnostico.py` and the tests in your own environment before using the prototype.
