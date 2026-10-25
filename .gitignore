@@ -1,0 +1,24 @@
+# Secretos y entorno local
+.env
+.env.*
+!.env.example
+.venv/
+venv/
+
+# Runtime: SQLite y cachés
+runtime/
+*.sqlite3
+*.sqlite3-journal
+*.db
+__pycache__/
+*.py[cod]
+.pytest_cache/
+
+# Datos de catálogo locales; no publicar el libro de demostración
+ShopIA_Base_Datos_RAG.xlsx
+
+# Grafo de análisis local
+graphify-out/
+
+# Archivos temporales de Excel (bloqueo al abrir el libro)
+~$*.xlsx

@@ -1,0 +1,6 @@
+python-telegram-bot==22.8
+openpyxl==3.1.5
+httpx==0.28.1
+python-dotenv==1.2.4
+# Solo para tests/test_shop.py (dependencia de desarrollo).
+pytest==9.1.1
